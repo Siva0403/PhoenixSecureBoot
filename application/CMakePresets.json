@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "default",
-      "description": "Default build for STM32F411xE (Black Pill)",
+      "description": "Default build for STM32F411xE -Black Pill",
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-none-eabi.cmake",

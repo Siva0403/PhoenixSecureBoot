@@ -1,0 +1,220 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Bootloader (Debug)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--preset",
+                "debug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Build Bootloader (Release)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--preset",
+                "release"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Compile Bootloader",
+            "type": "shell",
+            "command": "ninja",
+            "args": [
+                "-C",
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "dependsOn": "Build Bootloader (Release)",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "label": "Compile Bootloader (Debug)",
+            "type": "shell",
+            "command": "ninja",
+            "args": [
+                "-C",
+                "build_debug"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "dependsOn": "Build Bootloader (Debug)",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "label": "Flash Bootloader (CubeProgrammer)",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-File",
+                "${workspaceFolder}/.vscode/flash_bootloader.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "test"
+            },
+            "dependsOn": "Compile Bootloader"
+        },
+        {
+            "label": "Flash Application (CubeProgrammer)",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-File",
+                "${workspaceFolder}/.vscode/flash_application.ps1"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "test"
+            }
+        },
+        {
+            "label": "Binary to HEX Conversion",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "arm-none-eabi-objcopy -O ihex build/bootloader/phoenix_bootloader.elf build/bootloader/phoenix_bootloader.hex; Write-Host 'HEX file created at build/bootloader/phoenix_bootloader.hex'"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Binary to BIN Conversion",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "arm-none-eabi-objcopy -O binary build/bootloader/phoenix_bootloader.elf build/bootloader/phoenix_bootloader.bin; Write-Host 'BIN file created at build/bootloader/phoenix_bootloader.bin'"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Erase Flash",
+            "type": "shell",
+            "command": "'C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe'",
+            "args": [
+                "-c",
+                "port=SWD",
+                "-ob",
+                "READOUT=0"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Read Device Info",
+            "type": "shell",
+            "command": "'C:\\Program Files\\STMicroelectronics\\STM32Cube\\STM32CubeProgrammer\\bin\\STM32_Programmer_CLI.exe'",
+            "args": [
+                "-c",
+                "port=SWD"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean Build",
+            "type": "shell",
+            "command": "Remove-Item",
+            "args": [
+                "-Path",
+                "${workspaceFolder}/build",
+                "-Recurse",
+                "-Force",
+                "-ErrorAction",
+                "SilentlyContinue"
+            ],
+            "options": {
+                "shell": {
+                    "executable": "powershell.exe",
+                    "args": [
+                        "-Command"
+                    ]
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build & Flash Bootloader",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Compile Bootloader",
+                "Flash Bootloader (CubeProgrammer)"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Size Analysis",
+            "type": "shell",
+            "command": "arm-none-eabi-size",
+            "args": [
+                "build/bootloader/phoenix_bootloader.elf"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Start OpenOCD Server",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoExit",
+                "-Command",
+                "$oe = 'C:\\tools\\openocd\\bin\\openocd.exe'; if (Test-Path $oe) { $oeDir = Split-Path $oe; Push-Location $oeDir; Write-Host 'Starting OpenOCD from C:\\tools\\openocd...' -ForegroundColor Cyan; & $oe -f interface/stlink.cfg -f target/stm32f4x.cfg } else { Write-Host 'ERROR: OpenOCD not found at C:\\tools\\openocd'; Write-Host 'Download from: https://github.com/xpack-dev-tools/openocd-xpack/releases' -ForegroundColor Yellow }"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^.*Listening on port 3333.*$",
+                    "file": 1,
+                    "location": 2,
+                    "message": 3
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Listening on port.*$",
+                    "endsPattern": "^.*Listening on port 3333.*$"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

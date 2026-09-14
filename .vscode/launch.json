@@ -1,0 +1,123 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Bootloader (Flash & Debug)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug/bootloader/phoenix_bootloader.elf",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/arm-none-eabi-gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Connect to OpenOCD on localhost:3333",
+                    "text": "target remote localhost:3333",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Reset and halt target",
+                    "text": "monitor reset halt",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Load firmware to target",
+                    "text": "load",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Stop at main function",
+                    "text": "break main",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Continue to main",
+                    "text": "continue",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Compile Bootloader (Debug)",
+            "miDebuggerArgs": ""
+        },
+        {
+            "name": "Debug Bootloader (Attach Only)",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build_debug/bootloader/phoenix_bootloader.elf",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/arm-none-eabi-gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Connect to OpenOCD",
+                    "text": "target remote localhost:3333",
+                    "ignoreFailures": false
+                }
+            ],
+            "miDebuggerArgs": ""
+        },
+        {
+            "name": "Debug Application (Flash & Debug)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug/application/phoenix_application.elf",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/arm-none-eabi-gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Connect to OpenOCD",
+                    "text": "target remote localhost:3333",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Reset and halt",
+                    "text": "monitor reset halt",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Load application at 0x08010000",
+                    "text": "load",
+                    "ignoreFailures": false
+                },
+                {
+                    "description": "Set breakpoint at main",
+                    "text": "break main",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Continue to main",
+                    "text": "continue",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerArgs": ""
+        }
+    ]
+}
