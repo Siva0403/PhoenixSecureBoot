@@ -1,12 +1,16 @@
 #include "bootloader.h"
 #include "stm32f4xx.h"
 
-#define SRAM_START       0x20000000UL
-#define SRAM_END         0x20018000UL
+static uint8_t bootloader_validate_app_meta_data(const application_metadata *app_meta_data)
+{
+    if((app_meta_data->appsize <=  APPLICATION_MAX_SIZE) && (app_meta_data->appmagic == APPLICATION_MAGIC_NUMBER))
+    {
+        return 1;
+    }
 
-#define APPLICATION_END  0x08080000UL
+    return 0;
 
-typedef void (*application_entry_t)(void);
+}
 
 static uint8_t bootloader_validate_msp(uint32_t msp)
 {
@@ -83,8 +87,18 @@ uint8_t bootloader_validate_application(void)
     app_msp   = *(volatile uint32_t *)APPLICATION_ADDRESS;
     app_reset = *(volatile uint32_t *)(APPLICATION_ADDRESS + 4U);
 
+    const application_metadata *metadata = (const application_metadata *)APPLICATION_METADATA_ADDR;
+
     /*
-     * Step 1: Is an application present?
+    *   Step 1: Is Meta present!1
+    */
+    if (bootloader_validate_app_meta_data(metadata) == 0U)
+    {
+        return 0U;
+    }
+
+    /*
+     * Step 2: Is an application present?
      */
     if (bootloader_application_present(app_msp, app_reset) == 0U)
     {
@@ -92,7 +106,7 @@ uint8_t bootloader_validate_application(void)
     }
 
     /*
-     * Step 2: Is the application's stack pointer valid?
+     * Step 3: Is the application's stack pointer valid?
      */
     if (bootloader_validate_msp(app_msp) == 0U)
     {
@@ -100,7 +114,7 @@ uint8_t bootloader_validate_application(void)
     }
 
     /*
-     * Step 3: Is the application's Reset_Handler valid?
+     * Step 4: Is the application's Reset_Handler valid?
      */
     if (bootloader_validate_reset_handler(app_reset) == 0U)
     {

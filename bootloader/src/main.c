@@ -4,7 +4,7 @@
     This bootloader uses a small memory footprint and is designed to be secure. 
     It performs the following checks before jumping to the application:
     1. Checks if the application is present at the specified address.
-    
+
     Future Scope   : secure bootloader and recovery 
     project        : PhoenixSecureBoot
     Owner          : Siva Surya Narayana 
@@ -12,6 +12,7 @@
 
 #include "bootloader.h"
 #include "stm32f4xx.h"
+#include "sha_test.h"
 
 #define LED_PIN 13
 
@@ -39,6 +40,10 @@ static void bootloader_led_off(void)
 
 int main(void)
 {
+
+        SCB->CFSR = 0xFFFFFFFFUL;
+    SCB->HFSR = 0xFFFFFFFFUL;
+    SCB->DFSR = 0xFFFFFFFFUL;
     bootloader_led_init();
 
     bootloader_led_on();
@@ -49,6 +54,19 @@ int main(void)
     }
 
     bootloader_led_off();
+
+    if (sha256_test() == 0)
+{
+    /*
+     * SHA-256 test failed.
+     * Stay here with LED ON.
+     */
+    bootloader_led_on();
+
+    while (1)
+    {
+    }
+}
 
     // Check if the application is valid before jumping to it
     // Check msp, reset handler, and application presence
@@ -72,6 +90,6 @@ int main(void)
         }
     }
 
-    bootloader_jump_to_application();
+   bootloader_jump_to_application();
 
 }
