@@ -37,6 +37,6 @@ int main(void)
 
     while (1)
     {
-        application_led_on();
+        // application_led_on();
     }
 }

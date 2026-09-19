@@ -1,6 +1,71 @@
 #include "bootloader.h"
 #include "stm32f4xx.h"
 
+#define HASH_CHUNK_SIZE 1024U
+
+static uint8_t bootloader_calculate_application_hash(uint32_t image_size, uint8_t hash[WC_SHA256_DIGEST_SIZE])
+{
+    Sha256 sha256;
+    const uint8_t *application =(const uint8_t *)APPLICATION_ADDRESS;
+    uint32_t remaining = image_size;
+
+    if (wc_InitSha256(&sha256) != 0)
+    {
+        return 0U;
+    }
+
+    while (remaining > 0U)
+    {
+        uint32_t chunk_size;
+
+        if (remaining > HASH_CHUNK_SIZE)
+        {
+            chunk_size = HASH_CHUNK_SIZE;
+        }
+        else
+        {
+            chunk_size = remaining;
+        }
+
+        if (wc_Sha256Update(&sha256,application,chunk_size) != 0)
+        {
+            return 0U;
+        }
+
+        application += chunk_size;
+        remaining   -= chunk_size;
+    }
+
+    if (wc_Sha256Final(&sha256, hash) != 0)
+    {
+        return 0U;
+    }
+
+    return 1U;
+}
+
+uint8_t bootloader_test_application_hash(void)
+{
+    const application_metadata *metadata = (const application_metadata *)APPLICATION_METADATA_ADDR;
+
+    uint8_t calculated_hash[WC_SHA256_DIGEST_SIZE];
+
+    if (bootloader_calculate_application_hash( metadata->appsize, calculated_hash) == 0U)
+    {
+        return 0U;
+    }
+
+    for (uint32_t i = 0U; i < WC_SHA256_DIGEST_SIZE; i++)
+    {
+        if (calculated_hash[i] != metadata->apphash[i])
+        {
+            return 0U;
+        }
+    }
+
+    return 1U;
+}
+
 static uint8_t bootloader_validate_app_meta_data(const application_metadata *app_meta_data)
 {
     if((app_meta_data->appsize <=  APPLICATION_MAX_SIZE) && (app_meta_data->appmagic == APPLICATION_MAGIC_NUMBER))
@@ -67,8 +132,7 @@ static uint8_t bootloader_application_present(uint32_t app_msp,
      * If both vector-table entries are erased,
      * there is no application image.
      */
-    if ((app_msp == 0xFFFFFFFFUL) &&
-        (app_reset == 0xFFFFFFFFUL))
+    if ((app_msp == 0xFFFFFFFFUL) && (app_reset == 0xFFFFFFFFUL))
     {
         return 0U;
     }

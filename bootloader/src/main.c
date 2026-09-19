@@ -41,7 +41,7 @@ static void bootloader_led_off(void)
 int main(void)
 {
 
-        SCB->CFSR = 0xFFFFFFFFUL;
+    SCB->CFSR = 0xFFFFFFFFUL;
     SCB->HFSR = 0xFFFFFFFFUL;
     SCB->DFSR = 0xFFFFFFFFUL;
     bootloader_led_init();
@@ -55,18 +55,14 @@ int main(void)
 
     bootloader_led_off();
 
-    if (sha256_test() == 0)
-{
+    if (bootloader_test_application_hash() == 0)
+    {
     /*
      * SHA-256 test failed.
      * Stay here with LED ON.
      */
     bootloader_led_on();
-
-    while (1)
-    {
     }
-}
 
     // Check if the application is valid before jumping to it
     // Check msp, reset handler, and application presence
